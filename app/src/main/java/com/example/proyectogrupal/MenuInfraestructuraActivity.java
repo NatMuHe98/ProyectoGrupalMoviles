@@ -31,7 +31,7 @@ public class MenuInfraestructuraActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
     RecyclerView recycler;
     ArrayList<IncidenciaRV> listIncidencia;
-    int id;
+    String id;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

@@ -101,7 +101,7 @@ public class DetallesActivity extends AppCompatActivity {
         IncidenciaDto incidenciaDto = new IncidenciaDto();
 
         //Poner los valores antiguos
-        incidenciaDto.setId(Integer.valueOf(id));
+        incidenciaDto.setId(id);
         incidenciaDto.setNombre(nombre);
         incidenciaDto.setDescripcion(descripcion);
         incidenciaDto.setUbicacion(ubicacion);

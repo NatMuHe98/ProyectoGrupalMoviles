@@ -2,16 +2,21 @@ package com.example.proyectogrupal.entidades;
 
 public class IncidenciaDto {
 
-    private int id;
+    private String id;
     private String nombre;
+    private String imageUrl;
     private String descripcion;
     private int ubicacion;
     private boolean estado;
     private String comentario;
 
-    public IncidenciaDto(int id, String nombre, String descripcion, int ubicacion, boolean estado, String comentario) {
+    public IncidenciaDto(String id, String nombre, String imageUrl, String descripcion, int ubicacion, boolean estado, String comentario) {
+        if (nombre.trim().equals("")){
+            nombre = "Sin nombre";
+        }
         this.id = id;
         this.nombre = nombre;
+        this.imageUrl = imageUrl;
         this.descripcion = descripcion;
         this.ubicacion = ubicacion;
         this.estado = estado;
@@ -20,11 +25,11 @@ public class IncidenciaDto {
     public IncidenciaDto() {
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -34,6 +39,14 @@ public class IncidenciaDto {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getDescripcion() {

@@ -2,24 +2,22 @@ package com.example.proyectogrupal.entidades;
 
 public class IncidenciaRV {
 
-    private int id;
+    private String id;
     private String nombre;
     private boolean estado;
 
-    public IncidenciaRV(int id, String nombre, boolean estado) {
-        this.id = id;
-        this.nombre = nombre;
-        this.estado = estado;
-    }
 
     public IncidenciaRV() {
     }
 
-    public int getId() {
+    public IncidenciaRV(String id, String nombre, boolean estado) {
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
