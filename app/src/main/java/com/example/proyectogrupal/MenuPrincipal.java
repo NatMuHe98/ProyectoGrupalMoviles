@@ -18,6 +18,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MenuPrincipal extends AppCompatActivity {
     EditText Email, pass;
@@ -25,7 +35,11 @@ public class MenuPrincipal extends AppCompatActivity {
     String usuario;
     FirebaseUser currentUser;
     int resultcode = 5;
-
+    ArrayList<Object> objectArrayList1;
+    private DatabaseReference mDatabase;
+    ArrayList<String> infraestructura = new ArrayList<String>();
+    GenericTypeIndicator<HashMap<String, Object>> objectsGTypeInd = new GenericTypeIndicator<HashMap<String, Object>>() {};
+    int c=0,a=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,10 +49,11 @@ public class MenuPrincipal extends AppCompatActivity {
         pass = findViewById(R.id.editPass);
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     public void acceder(View view) {
-        String validarEmail = Email.getText().toString();
+        final String validarEmail = Email.getText().toString();
         String password = pass.getText().toString();
 
         if (validarEmail.isEmpty()) {
@@ -79,20 +94,52 @@ public class MenuPrincipal extends AppCompatActivity {
 
 
                                     } else {
-
-                                        if(dominio[0].equals("a20202943")||dominio[0].equals("a20202918")||dominio[0].equals("dadick.monzon")){
-                                            updateUI(user);
-                                            Intent intent = new Intent(MenuPrincipal.this, Admin.class);
-                                            intent.putExtra("uid", usuario);
-                                            startActivityForResult(intent, 4);
-                                        }else {
-
-
                                         updateUI(user);
-                                        Intent intent = new Intent(MenuPrincipal.this, MainActivity3.class);
-                                        intent.putExtra("uid", usuario);
-                                        startActivityForResult(intent, 3);
-                                        }
+                                        mDatabase.child("INFRAESTRUCTURA").addValueEventListener(new ValueEventListener(){
+
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                int contar=0;
+                                                if(dataSnapshot.exists()){
+                                                    GenericTypeIndicator<HashMap<String, Object>> objectsGTypeInd = new GenericTypeIndicator<HashMap<String, Object>>() {};
+                                                    Map<String, Object> objectHashMap = dataSnapshot.getValue(objectsGTypeInd);
+                                                    ArrayList<Object> objectArrayList = new ArrayList<Object>(objectHashMap.values());
+                                                    objectArrayList1=objectArrayList;
+                                                    Log.d("infraestr", String.valueOf(objectArrayList));
+                                                    for(int i=0;i<objectArrayList1.size();i++){
+                                                        Log.d("esta validado?", validarEmail);
+                                                        if(validarEmail.equals(objectArrayList.get(i))){
+                                                            Log.d("esta validado?", String.valueOf(objectArrayList.get(i)));
+                                                            contar=contar+1;
+                                                            Log.d("esta validado?", String.valueOf(c));
+                                                        }
+                                                    }
+                                                    if(contar==0){
+
+
+
+                                                        Intent intent = new Intent(MenuPrincipal.this, MainActivity3.class);
+                                                        intent.putExtra("uid", usuario);
+                                                        startActivityForResult(intent, 3);
+                                                    }else{
+
+
+                                                        Intent intent = new Intent(MenuPrincipal.this, Admin.class);
+                                                        intent.putExtra("uid", usuario);
+                                                        startActivityForResult(intent, 4);
+                                                    }
+
+
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+
                                     }
                                 } else {
                                     // If sign in fails, display a message to the user.
@@ -108,10 +155,7 @@ public class MenuPrincipal extends AppCompatActivity {
                         });
 
 
-            }
-
-
-            else{
+            } else {
                 Toast.makeText(MenuPrincipal.this, "SOLO DOMINIO PUCP", Toast.LENGTH_SHORT).show();
 
                 Email.requestFocus();
@@ -122,7 +166,8 @@ public class MenuPrincipal extends AppCompatActivity {
     }
 
 
-    public void crear(View view){
+
+    public void crear(View view) {
         Intent intent = new Intent(MenuPrincipal.this, CrearAcc.class);
         startActivityForResult(intent, 1);
     }
@@ -153,7 +198,7 @@ public class MenuPrincipal extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Email.setText("");
         pass.setText("");
-        if (requestCode == 2 || requestCode == 3|| requestCode == 4) {
+        if (requestCode == 2 || requestCode == 3 || requestCode == 4) {
             updateUI(null);
             Log.d("salida exitosa", mAuth.getUid());
             resultCode = requestCode;
@@ -168,6 +213,7 @@ public class MenuPrincipal extends AppCompatActivity {
         }
 
     }
+
     public void updateUI(FirebaseUser user) {
         if (user != null) {
             usuario = user.getUid();

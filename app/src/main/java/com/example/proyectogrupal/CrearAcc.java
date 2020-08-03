@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class CrearAcc extends AppCompatActivity {
     EditText editemail,editpass,edituser;
     private FirebaseAuth mAuth;
+    FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,9 +26,11 @@ public class CrearAcc extends AppCompatActivity {
         editemail=findViewById(R.id.email);
         editpass=findViewById(R.id.pass);
         edituser=findViewById(R.id.user);
+
         mAuth = FirebaseAuth.getInstance();
     }
     public void validarPucp(View view){
+
         String validarEmail=editemail.getText().toString();
         String password=editpass.getText().toString();
 
@@ -38,32 +41,11 @@ public class CrearAcc extends AppCompatActivity {
         }else {
             String[] dominio=validarEmail.split("@");
             if(dominio[1].equals("pucp.pe")||dominio[1].equals("pucp.edu.pe")){
-                Toast.makeText(CrearAcc.this,"registro completado",Toast.LENGTH_SHORT).show();
 
-                mAuth.createUserWithEmailAndPassword(validarEmail, password)
-                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
-                                    Log.d("prueba", "createUserWithEmail:success");
-                                    FirebaseUser user = mAuth.getCurrentUser();
+                //
+              crear();
 
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Log.w("prueba", "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(CrearAcc.this, "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                // ...
-                            }
-                        });
-
-
-
-                finish();
+                //
 
 
             }else{
@@ -73,6 +55,37 @@ public class CrearAcc extends AppCompatActivity {
                 return;
             }
         }
+
+
+
+
+
+    }
+    public void crear(){
+
+        String validarEmail=editemail.getText().toString();
+        String password=editpass.getText().toString();
+        mAuth.createUserWithEmailAndPassword(validarEmail, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d("prueba", "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            Toast.makeText(CrearAcc.this,"registro completado",Toast.LENGTH_SHORT).show();
+                            finish();
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w("prueba", "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(CrearAcc.this, "usuario ya EXISTE",
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        // ...
+                    }
+                });
 
 
 
