@@ -3,9 +3,12 @@ package com.example.proyectogrupal;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.proyectogrupal.entidades.IncidenciaDto;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -32,9 +40,14 @@ import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-public class RegistrarIncidencia extends AppCompatActivity {
+import static com.example.proyectogrupal.util.Constants.MAPVIEW_BUNDLE_KEY;
+
+
+public class RegistrarIncidencia extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    double latitud, longitud;
 
     private EditText editTextTextNombreIncidencia, editTextDescripcionIncidencia;
     private ImageView imageViewAgregarFoto;
@@ -48,6 +61,7 @@ public class RegistrarIncidencia extends AppCompatActivity {
 
     private StorageTask storageTask;
 
+    private MapView mMapView;
 
 
     @Override
@@ -61,9 +75,22 @@ public class RegistrarIncidencia extends AppCompatActivity {
         buttonEnviarIncidencia = findViewById(R.id.buttonEnviarIncidencia);
         buttonSubirFoto = findViewById(R.id.buttonSubirFoto);
         progressbar_SubirFoto = findViewById(R.id.progressbar_SubirFoto);
+        mMapView = (MapView) findViewById(R.id.mapView_IncidenciaUser);
 
         storageReference = FirebaseStorage.getInstance().getReference("Incidencias");
         databaseReference = FirebaseDatabase.getInstance().getReference("Incidencias");
+
+        // *** IMPORTANT ***
+        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
+        // objects or sub-Bundles.
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+        }
+
+        mMapView.onCreate(mapViewBundle);
+
+        mMapView.getMapAsync(this);
 
         buttonSubirFoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,9 +102,9 @@ public class RegistrarIncidencia extends AppCompatActivity {
         buttonEnviarIncidencia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(storageTask != null && storageTask.isInProgress()){
+                if (storageTask != null && storageTask.isInProgress()) {
                     Toast.makeText(RegistrarIncidencia.this, "Envío en proceso", Toast.LENGTH_SHORT).show();
-                }else{
+                } else {
                     EnviarIncidencia();
                 }
             }
@@ -85,7 +112,8 @@ public class RegistrarIncidencia extends AppCompatActivity {
 
     }
 
-    private String extensionArchivo (Uri uri){
+
+    private String extensionArchivo(Uri uri) {
         ContentResolver contentResolver = getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
@@ -98,13 +126,13 @@ public class RegistrarIncidencia extends AppCompatActivity {
         final boolean estado = false;
         final String comentario = null;
 
-        if (nombre.isEmpty()){
+        if (nombre.isEmpty()) {
             editTextTextNombreIncidencia.setError("Nombre no debe quedar vacío");
-        }else if (descripcion.isEmpty()){
+        } else if (descripcion.isEmpty()) {
             editTextDescripcionIncidencia.setError("Descripción no debe quedar vacio");
-        }else{
+        } else {
 
-            if (myImageUri != null){
+            if (myImageUri != null) {
                 //ASIGNACIÓN DEL NOMBRE DE LA IMAGEN Y SU EXTENSIÓN
                 StorageReference fileReference = storageReference.child(System.currentTimeMillis()
                         + "." + extensionArchivo(myImageUri));
@@ -122,9 +150,9 @@ public class RegistrarIncidencia extends AppCompatActivity {
                                 Toast.makeText(RegistrarIncidencia.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                                 String id = databaseReference.push().getKey();
                                 String url = taskSnapshot.getUploadSessionUri().toString();
-                                if(id!=null){
-                                    //SE AGREGAN LOS DATOS OBTENIDOS A DATABSE 
-                                    IncidenciaDto incidenciaDto = new IncidenciaDto(id, nombre, url, descripcion, ubicacion, estado, comentario );
+                                if (id != null) {
+                                    //SE AGREGAN LOS DATOS OBTENIDOS A DATABSE
+                                    IncidenciaDto incidenciaDto = new IncidenciaDto(id, nombre, url, descripcion, latitud, longitud, estado, comentario);
                                     databaseReference.child(id).setValue(incidenciaDto);
                                 }
                             }
@@ -138,12 +166,12 @@ public class RegistrarIncidencia extends AppCompatActivity {
                         .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-                                double progress = (100.0 * taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                                double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
                                 progressbar_SubirFoto.setProgress((int) progress);
                             }
                         });
 
-            }else{
+            } else {
                 Toast.makeText(RegistrarIncidencia.this, "No se seleccionó fotografía", Toast.LENGTH_SHORT).show();
             }
         }
@@ -156,14 +184,77 @@ public class RegistrarIncidencia extends AppCompatActivity {
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null){
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             myImageUri = data.getData();
             Picasso.with(this).load(myImageUri).into(imageViewAgregarFoto);
 
         }
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mMapView.onSaveInstanceState(mapViewBundle);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMapView.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMapView.onStop();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        map.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title("Marker"));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        map.setMyLocationEnabled(true);
+    }
+
+    @Override
+    public void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        mMapView.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
 }

@@ -6,11 +6,12 @@ public class IncidenciaDto {
     private String nombre;
     private String imageUrl;
     private String descripcion;
-    private int ubicacion;
+    private double latitud;
+    private double longitud;
     private boolean estado;
     private String comentario;
 
-    public IncidenciaDto(String id, String nombre, String imageUrl, String descripcion, int ubicacion, boolean estado, String comentario) {
+    public IncidenciaDto(String id, String nombre, String imageUrl, String descripcion, double latitud, double longitud, boolean estado, String comentario) {
         if (nombre.trim().equals("")){
             nombre = "Sin nombre";
         }
@@ -18,7 +19,8 @@ public class IncidenciaDto {
         this.nombre = nombre;
         this.imageUrl = imageUrl;
         this.descripcion = descripcion;
-        this.ubicacion = ubicacion;
+        this.latitud = latitud;
+        this.longitud = longitud;
         this.estado = estado;
         this.comentario = comentario;
     }
@@ -57,12 +59,20 @@ public class IncidenciaDto {
         this.descripcion = descripcion;
     }
 
-    public int getUbicacion() {
-        return ubicacion;
+    public double getLatitud() {
+        return latitud;
     }
 
-    public void setUbicacion(int ubicacion) {
-        this.ubicacion = ubicacion;
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+
+    public double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(double longitud) {
+        this.longitud = longitud;
     }
 
     public boolean isEstado() {
