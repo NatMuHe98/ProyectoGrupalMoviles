@@ -9,6 +9,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,13 +25,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.proyectogrupal.entidades.IncidenciaDto;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -63,6 +70,10 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
 
     private MapView mMapView;
 
+    private GoogleMap gMap;
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +88,12 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
         progressbar_SubirFoto = findViewById(R.id.progressbar_SubirFoto);
         mMapView = (MapView) findViewById(R.id.mapView_IncidenciaUser);
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
         storageReference = FirebaseStorage.getInstance().getReference("Incidencias");
         databaseReference = FirebaseDatabase.getInstance().getReference("Incidencias");
 
-        // *** IMPORTANT ***
-        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
-        // objects or sub-Bundles.
+
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
@@ -106,12 +117,12 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
                     Toast.makeText(RegistrarIncidencia.this, "Envío en proceso", Toast.LENGTH_SHORT).show();
                 } else {
                     EnviarIncidencia();
+
                 }
             }
         });
 
     }
-
 
     private String extensionArchivo(Uri uri) {
         ContentResolver contentResolver = getContentResolver();
@@ -122,7 +133,6 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
     private void EnviarIncidencia() {
         final String nombre = editTextTextNombreIncidencia.getText().toString();
         final String descripcion = editTextDescripcionIncidencia.getText().toString();
-        final int ubicacion = 1;
         final boolean estado = false;
         final String comentario = null;
 
@@ -147,13 +157,14 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
                                         progressbar_SubirFoto.setProgress(0);
                                     }
                                 }, 500);
-                                Toast.makeText(RegistrarIncidencia.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                                 String id = databaseReference.push().getKey();
                                 String url = taskSnapshot.getUploadSessionUri().toString();
                                 if (id != null) {
                                     //SE AGREGAN LOS DATOS OBTENIDOS A DATABSE
                                     IncidenciaDto incidenciaDto = new IncidenciaDto(id, nombre, url, descripcion, latitud, longitud, estado, comentario);
                                     databaseReference.child(id).setValue(incidenciaDto);
+                                    Toast.makeText(RegistrarIncidencia.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                                    finish();
                                 }
                             }
                         })
@@ -210,26 +221,10 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mMapView.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mMapView.onStop();
-    }
-
-    @Override
     public void onMapReady(GoogleMap map) {
-        map.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title("Marker"));
+        gMap = map;
+        miUbicacion(map);
+        //map.addMarker(new MarkerOptions().position(new LatLng(latitud, longitud)).title("Marker"));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -239,22 +234,32 @@ public class RegistrarIncidencia extends AppCompatActivity implements OnMapReady
         map.setMyLocationEnabled(true);
     }
 
-    @Override
-    public void onPause() {
-        mMapView.onPause();
-        super.onPause();
+    public void miUbicacion(GoogleMap googleMap){
+        gMap = googleMap;
+        Log.d("localizacion", "Obteniendo ubicación");
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                if(task.isSuccessful() ){
+                    Location location = task.getResult();
+                    LatLng miUbicacion = new LatLng(location.getLatitude(), location.getLongitude());
+                    gMap.addMarker(new MarkerOptions().position(miUbicacion).title("Incidencia"));
+                    gMap.moveCamera(CameraUpdateFactory.newLatLng(miUbicacion));
+                    latitud = location.getLatitude();
+                    longitud = location.getLongitude();
+                    Log.d("localizacion", "Lat = "+ latitud);
+                    Log.d("localizacion", "Long = "+ longitud);
+                }
+            }
+        });
     }
 
-    @Override
-    public void onDestroy() {
-        mMapView.onDestroy();
-        super.onDestroy();
-    }
 
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
-    }
 
 }
