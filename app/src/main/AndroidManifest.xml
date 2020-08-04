@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.proyectogrupal">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -11,8 +13,6 @@
         android:required="true"/>
 
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,6 +20,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <activity android:name=".Admin"></activity>
+        <activity android:name=".CrearAcc" />
+        <activity android:name=".MainActivity3" />
+        <activity android:name=".MenuPrincipal">
         <activity android:name=".RegistrarIncidencia"></activity>
         <activity android:name=".DetallesActivity" />
         <activity android:name=".MenuInfraestructuraActivity">
@@ -28,9 +33,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity">
-
         </activity>
 
         <meta-data
