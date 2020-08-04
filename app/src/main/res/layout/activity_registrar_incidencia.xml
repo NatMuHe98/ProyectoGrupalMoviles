@@ -60,31 +60,33 @@
         android:text="Enviar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressbar_SubirFoto" />
+        app:layout_constraintTop_toBottomOf="@+id/mapView_IncidenciaUser" />
 
     <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/mapView_IncidenciaUser"
         android:layout_width="0dp"
-        android:layout_height="85dp"
+        android:layout_height="0dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
+        android:layout_marginBottom="64dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextDescripcionIncidencia" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextDescripcionIncidencia"
+        app:layout_constraintVertical_bias="1.0" />
 
     <ProgressBar
         android:id="@+id/progressbar_SubirFoto"
-        android:layout_width="346dp"
+        android:layout_width="0dp"
         android:layout_height="24dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonEnviarIncidencia"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapView" />
+        app:layout_constraintTop_toBottomOf="@+id/mapView_IncidenciaUser" />
 
     <Button
         android:id="@+id/buttonSubirFoto"

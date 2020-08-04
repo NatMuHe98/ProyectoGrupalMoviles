@@ -38,7 +38,7 @@ public class MenuInfraestructuraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_infraestructura);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("incidencias");
+        databaseReference = FirebaseDatabase.getInstance().getReference("Incidencias");
 
         recycler = findViewById(R.id.recyclerViewInfra);
         recycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
@@ -63,7 +63,7 @@ public class MenuInfraestructuraActivity extends AppCompatActivity {
                             Log.d("infoApp","seleeccion: "+id);
 
                             Intent intent = new Intent(MenuInfraestructuraActivity.this, DetallesActivity.class);
-                            intent.setData(Uri.parse(String.valueOf(id)));
+                            intent.setData(Uri.parse(id));
                             int requestCode = 1;
                             startActivityForResult(intent,requestCode);
 
