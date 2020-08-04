@@ -124,7 +124,7 @@ public class MenuPrincipal extends AppCompatActivity {
                                                     }else{
 
 
-                                                        Intent intent = new Intent(MenuPrincipal.this, Admin.class);
+                                                        Intent intent = new Intent(MenuPrincipal.this, MenuInfraestructuraActivity.class);
                                                         intent.putExtra("uid", usuario);
                                                         startActivityForResult(intent, 4);
                                                     }

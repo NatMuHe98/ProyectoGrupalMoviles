@@ -12,8 +12,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -138,5 +140,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    public void iniciarSesion(View view){
+        Intent intent = new Intent(MainActivity.this, MenuInfraestructuraActivity.class);
+        int requestCode = 1;
+        startActivityForResult(intent,requestCode);
     }
 }

@@ -21,13 +21,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".Admin"></activity>
         <activity android:name=".CrearAcc" />
-        <activity android:name=".MainActivity3" />
-        <activity android:name=".MenuPrincipal">
+        <activity android:name=".MenuPrincipal"/>
         <activity android:name=".RegistrarIncidencia"></activity>
         <activity android:name=".DetallesActivity" />
         <activity android:name=".MenuInfraestructuraActivity">
+
+        </activity>
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
