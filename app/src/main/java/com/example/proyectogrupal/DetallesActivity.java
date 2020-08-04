@@ -75,11 +75,11 @@ public class DetallesActivity extends AppCompatActivity {
                     TextView textViewDescripcion = findViewById(R.id.textViewDescripcion);
                     descripcion = incidenciaDto.getDescripcion();
                     textViewDescripcion.setText(descripcion);
-
+/*
                     TextView textViewUbicacion = findViewById(R.id.textViewUbicacion);
                     ubicacion = incidenciaDto.getUbicacion();
                     textViewUbicacion.setText(String.valueOf(ubicacion));
-
+*/
                     toggleButton = findViewById(R.id.toggleButton);
                     toggleButton.setChecked(incidenciaDto.isEstado());
 
@@ -104,7 +104,7 @@ public class DetallesActivity extends AppCompatActivity {
         incidenciaDto.setId(id);
         incidenciaDto.setNombre(nombre);
         incidenciaDto.setDescripcion(descripcion);
-        incidenciaDto.setUbicacion(ubicacion);
+       // incidenciaDto.setUbicacion(ubicacion);
 
         //Valor del switch
         estado = toggleButton.isChecked();
